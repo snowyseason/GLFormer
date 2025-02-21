@@ -6,7 +6,7 @@
 - Ubuntu 20.04, with Python 3.8 and the following python dependencies.
 ```
 pip install -r requirements.txt
-
+```
 ## Data Preparation 
 <details>
 <summary>
