@@ -5,42 +5,6 @@ import matplotlib.pyplot as plt
 from captum.attr import visualization as viz
 from tqdm import tqdm
 
-def normalize_scoremap(cam, norm_method, percentile):
-        """
-            Args:
-                cam: numpy.ndarray(size=(H, W), dtype=np.float)
-            Returns:
-                numpy.ndarray(size=(H, W), dtype=np.float) between 0 and 1.
-                If input array is constant, a zero-array is returned.
-            """
-        if np.isnan(cam).any():
-            return np.zeros_like(cam)
-        if cam.min() == cam.max():
-            return np.zeros_like(cam)
-        if norm_method == 'minmax':
-            cam -= cam.min()
-            cam /= cam.max()
-        elif norm_method == 'max':
-            cam = np.maximum(0, cam)
-            cam /= cam.max()
-        elif norm_method == 'pas':
-            cam -= cam.min()
-            cam_copy = cam.flatten()
-            cam_copy.sort()
-            maxx = cam_copy[int(cam_copy.size * 0.9)]
-            cam /= maxx
-            cam = np.minimum(1, cam)
-        elif norm_method == 'ivr':
-            cam_copy = cam.flatten()
-            cam_copy.sort()
-            minn = cam_copy[int(cam_copy.size * percentile)]
-            cam -= minn
-            cam = np.maximum(0, cam)
-            cam /= cam.max()
-        else:
-            print('Norm not defined')
-        return cam
-
 dataset = 'PN2'
 cam_path = 'rslogs/PN2_conformer-s_cosrefine_cpk01/cos_repeat1'
 
@@ -58,7 +22,6 @@ for foldername, subfolders, filenames in os.walk(f'{cam_path}/scoremaps'):
             # 读取并处理图像和热力图
             img = cv2.resize(cv2.imread(image_path), (224, 224))
             heatmap = np.expand_dims(np.load(filepath), axis=2)
-            heatmap = normalize_scoremap(heatmap, norm_method='ivr', percentile=0.3)
 
             # 核心去白边步骤1：关闭坐标轴
             plt.axis('off')
